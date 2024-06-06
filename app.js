@@ -30,17 +30,16 @@ main().then(() => {
 }).catch((err) => {
     console.log(err);
 });
-
 async function main(){
     mongoose.connect(dbUrl);
 }
 
 app.set("view engine","ejs");
-app.set("views", path.join(__dirname,"views"));
+app.set("views", path.join(dirname,"views"));
 app.use(express.urlencoded({extended: true}));
 app.use(methodOverride("_method"));
 app.engine("ejs", ejsMate);
-app.use(express.static(path.join(__dirname,"/public")));
+app.use(express.static(path.join(dirname,"/public")));
 
 const store = MongoStore.create({
     mongoUrl: dbUrl,
@@ -53,7 +52,6 @@ const store = MongoStore.create({
 store.on("error",() => {
     console.log("ERROR in MONGO SESSION STORE",err);
 });
-
 const sessionOptions = {
     store,
     secret: process.env.SECRET,
@@ -66,9 +64,9 @@ const sessionOptions = {
     },
 };
 
-// app.get("/",(req,res) => {
-//     res.send("Hi, I'm listening");
-// });
+app.get("/",(req,res) => {
+     res.redirect("/listings");
+});
 
 
 
@@ -82,25 +80,12 @@ passport.use(new LocalStrategy(User.authenticate()));
 
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
-
 app.use((req,res,next)=>{
     res.locals.success = req.flash("success");
     res.locals.error = req.flash("error");
     res.locals.currUser = req.user;
     next();
 });
-
-// app.get("/demouser",async(req,res) => {
-//     let fakeUser = new User({
-//         email: "smit@28",
-//         username: "pikachu"
-//     });
-
-//     let registeredUser = await User.register(fakeUser,"pass1234");
-//     res.send(registeredUser);
-// });
-
-
 
 
 app.use("/listings", listingRouter);
@@ -123,5 +108,4 @@ app.use((err,req,res,next) => {
 app.listen(8080,() => {
     console.log("server is listening to port 8080");
 });
-
 
